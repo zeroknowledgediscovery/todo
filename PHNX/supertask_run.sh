@@ -18,70 +18,90 @@ ERR_TASKS="$SUPERTASKFOLDER"/ERR_TASKS
 DONE_TASKS="$SUPERTASKFOLDER"/DONE_TASKS
 ERROR_LOG="$SUPERTASKFOLDER"/phnx.err
 STATS="$SUPERTASKFOLDER"/STATS
-LOG="$STATS"/log.txt
+LAUNCHED_JOBS="$SUPERTASKFOLDER"/"launched_jobs.dat"
+RUNNING_IDS="$SUPERTASKFOLDER"/"running_ids.dat"
+ERRED_IDS="$SUPERTASKFOLDER"/"erred_ids.dat"
+BUFFER="$SUPERTASKFOLDER"/"buffer.dat"
 
-
-# FILES TO TRACK IDS AND JOBNAMES RUNNING CURRENTLY
-RUNNING_JOBS="running_now.dat"
-touch $RUNNING_JOBS
-RUNNING_IDS="running_ids.dat"
+touch $LAUNCHED_JOBS
 touch $RUNNING_IDS
+touch $ERRED_IDS
+touch $BUFFER
 
-#># GET NUMBER OF ALL TASKS
-NUM_ALLTASKS=`file_count $ALL_TASKS`
+######################################################
+#   UPDATE CURRENTLY RUNNING, DONE AND ERRED TASKS   #
+######################################################
 
-
-# //////////////////////////////// #
-#  TRACK COMPLETED & ERRED TASKS   #
-# //////////////////////////////// #
-touch "$LOG"
-sacct --format="JobName, State" > "$LOG"
-
-
-#
-# HANDLE COMPLETED TASKS
-#
-while read LINE; do
-    job=$(echo $LINE | awk  '{print $1}')
-    status=$(echo $LINE | awk  '{print $2}')
-    to_move="$job".sbc
-    # MOVE SCRIPT TO DONE AND REMOVE FROM RUNNING IF IT IS COMPLETE
-    if [ "$status" = "COMPLETED" ] ; then
-        if [ -f "$ALL_TASKS"/"$to_move" ] ; then
-            cp "$ALL_TASKS"/"$to_move" "$DONE_TASKS"
-            rm -f "$RUNNING_TASKS"/"$to_move"
-            echo "$to_move is complete."
-        fi
+# READ CURRENTLY RUNNING JOBS INFO
+squeue > squeue.dat
+# FROM SQUEUE, GET ALL IDS WITH SPECIFIED USERNAME
+while read LINE;
+do 
+    ID=$(echo $LINE | awk  '{print $1}')
+    JOB_USER=$(echo $LINE | awk '{print $4}')
+    if [ "$JOB_USER" == "$USER" ] ; then
+        echo $ID >> $RUNNING_IDS
     fi
-done <"$LOG"
+done < squeue.dat
 
-#
-# EXTRACT THE CURRENT RUNNING TASKS' NAMES AND IDS
-#
-while read LINE; do
-	echo $(echo $LINE | awk  '{print $5}') >> "$RUNNING_IDS"
-done < "$RUNNING_JOBS"> "$RUNNING_IDS"
 
-#
-# CHECK FOR ERRED TASKS, ADD THEM TO ERRED AND REMOVE FROM RUNNING
-#
+####### ==ERROR TRACKING AMENDMENT==
+# Gather current error messages as ids, then check current id for membership in err_list
 while read ERROR; do
-    err_id=$(echo $ERROR | awk '{print $1}' | sed 's/.*xx//g' | sed 's/[^0-9]*//g')
-    if grep -q "$err_id" "running_ids.dat" ; then
-        while read RECORD; do 
-            job_name=$(echo $RECORD | awk  '{print $1}')
-            job_id=$(echo $RECORD | awk  '{print $5}')
-            to_move="%job_name"
-            if [ $job_id -eq $err_id ] ; then
-               if [ -f "$ALL_TASKS"/"$job_name" ] ; then 
-                    echo "$job_name HAS ERRED"
-                    cp "$ALL_TASKS"/"$job_name" "$ERR_TASKS"
-                    rm -f "$RUNNING_TASKS"/"$job_name"
-                fi 
+    # GET JOB ID FOR CURRENT MESSAGE
+    ERR_ID=$(echo $ERROR | awk '{print $1}' | sed 's/.*xx//g' | sed 's/[^0-9]*//g')
+    echo $ERR_ID >> $ERRED_IDS
+done < $ERROR_LOG
+
+# ITERATE OVER ERROR MESSAGES TO SEE IF THE JOB HAS ERRED
+#        while read ERROR; do
+#            # GET JOB ID FOR CURRENT MESSAGE
+#            ERR_ID=$(echo $ERROR | awk '{print $1}' | sed 's/.*xx//g' | sed 's/[^0-9]*//g')
+#            # IF THE ERROR ID IS THE JOB ID 
+#            if [ "$JOB_ID" == "$ERR_ID" ] ; then
+#                # Check if the job is from our supertask
+#                if [ -f "$ALL_TASKS"/"$JOB_NAME" ] ; then 
+#                    echo "$JOB_NAME HAS ERRED"
+#                    cp "$ALL_TASKS"/"$JOB_NAME" "$ERR_TASKS"
+#                    rm -f "$RUNNING_TASKS"/"$JOB_NAME"
+#                    continue
+#                fi
+#            fi
+#        done < $ERROR_LOG
+
+
+# ITERATE OVER LAUNCHED AND SUPPOSEDLY RUNNING JOBS
+while read RECORD; do
+    JOB_NAME=$(echo $RECORD | awk  '{print $1}')
+    JOB_ID=$(echo $RECORD | awk  '{print $5}')
+    # SAVE THE RECORD IF JOB IS INDEED STILL RUNNING (as shown in squeue)
+    if grep -q "$JOB_ID" "$RUNNING_IDS" ; then
+        echo $RECORD >> $BUFFER 
+    else 
+        # IF THE JOB ID IS AMONG ERRED ONES
+        if [ $(cat $ERRED_IDS | grep -c $JOB_ID) -eq 1 ] ; then
+             # Check if the job is from our supertask
+                if [ -f "$ALL_TASKS"/"$JOB_NAME" ] ; then 
+                    echo "$JOB_NAME HAS ERRED"
+                    cp "$ALL_TASKS"/"$JOB_NAME" "$ERR_TASKS"
+                    rm -f "$RUNNING_TASKS"/"$JOB_NAME"
+                    continue
+                fi
+        # FINALLY, IF THE JOB IS NOT RUNNING AND NEITHER HAS ERRED, CONSIDER IT DONE
+        else
+            if [ -f "$ALL_TASKS"/"$JOB_NAME" ] ; then
+                cp "$ALL_TASKS"/"$JOB_NAME" "$DONE_TASKS"
+                rm -f "$RUNNING_TASKS"/"$JOB_NAME"
+                echo "$JOB_NAME is complete."
             fi
-        done < "$RUNNING_JOBS"
-    fi
-done < "$ERROR_LOG"
+        fi
+    fi        
+done < "$LAUNCHED_JOBS"
+# SUBSTITUTE INITIAL LIST OF RUNNING JOBS WITH BUFFER THAT CONTAINS UDPATED INFO
+mv $BUFFER $LAUNCHED_JOBS
+
+#./supertask_run.sh: line 71: $LAUNCHED_IDS: ambiguous redirect
+# mv: cannot stat ‘WW/buffer.dat’: No such file or directory
 
 # Track the datetime of the current iteration
 echo ""
@@ -93,6 +113,8 @@ echo ""
 #>#># TRACK THE REMAINING SCRIPTS TO RUN
 #>#>#
 update_remaining $SUPERTASKFOLDER -verbose
+
+NUM_ALLTASKS=`file_count $ALL_TASKS`
 NUM_RUNNING=`file_count $RUNNING_TASKS`
 NUM_TODO=`file_count $TODO_TASKS`
 

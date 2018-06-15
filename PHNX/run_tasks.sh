@@ -17,7 +17,7 @@ NOW_RUNNING="$SUPERTASK"/RUNNING_TASKS
 # Dynamic var to track remaning runs to launch
 runs_to_launch=$NUM_TO_RUN
 
-RUN_LOG=running_now.dat
+LAUNCHED_JOBS="$SUPERTASK"/"launched_jobs.dat"
 
 # For script in TODO_TASKS/*.sbc
 for TASK in "$TODO_TASKS"/*; do
@@ -27,10 +27,10 @@ for TASK in "$TODO_TASKS"/*; do
         fi
         echo "LAUNCHING >> $(basename $TASK) "
         # ADD JOB NAME TO RUNNING LOG
-        echo -n "$(basename $TASK) " >> $RUN_LOG
+        echo -n "$(basename $TASK) " >> $LAUNCHED_JOBS
         # *** EXECUTE THE SCRIPT ON SLURM ***
         # ADD LAUNCH MESSAGE TO THE LOG
-        sbatch $TASK >> $RUN_LOG
+        sbatch $TASK >> $LAUNCHED_JOBS
         # COPY FILE TO CURRENTLY RUNNING FOLDER
         cp "$TASK" "$NOW_RUNNING"
         # Decrement the counter upon each run
