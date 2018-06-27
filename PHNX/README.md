@@ -7,9 +7,10 @@ Launches supertasks within PHNX folder.
 
 **Program requirements**
 ----
-In order to be runnable via PHNX, the program calls should be packed together with all the data required for run into a single folder called `PAYLOAD`.  All program calls should reference the data using absolute paths leading to `PAYLOAD`.
+In order to be runnable via PHNX, the program calls should be packed together with all the data and executables required for run into a single folder called `PAYLOAD`.
 
 Every `PAYLOAD` should contain  :
+* `bin` - folder containing all the executables to be executed during the supertask
 * `program_calls.txt`  - list of program calls to run, each line contains one call
 * `dependencies.txt`  - list of program dependencies to install
 * `running_config.txt`  - list of slurm running parameters :
@@ -26,8 +27,16 @@ Every `PAYLOAD` should contain  :
 **To run:**
 ----
 In PHNX folder, run:
-`./initializer.sh [SUPERTASK_NAME] [PAYLOAD_PATH]`
-also see `SAMPLE_PAYLOAD` for an example;
+`./initializer.sh [SUPERTASK_NAME] [FULL_PAYLOAD_PATH]`
+also see `SAMPLE_PAYLOAD` and `TERROR_PAYLOAD` for an examples;
+
+**TERROR example:**
+----
+Load `TERROR_PAYLOAD` on your instance;
+
+Load `PHNX` folder on your instance, cd to it;
+
+Run `./initializer.sh TERROR [full_path_to_payload_folder]`
 
 **Script descriptions**
 ----

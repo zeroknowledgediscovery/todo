@@ -25,6 +25,12 @@ PAYLOAD="$2"
 ##################################################
 read_configs "$PAYLOAD"/running_config.txt
 
+##################################################
+#  ENABLE EXECUTION OF ALL FILES IN PAYLOAD/bin  #
+##################################################
+EXEC_DIR="$PAYLOAD"/bin
+chmod -R ugo+x "$EXEC_DIR"
+
 ###########################################
 #                PART 1                   # 
 #           INITIALIZE THE FOLDERS        #
