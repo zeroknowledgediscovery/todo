@@ -47,7 +47,7 @@ mkdir "$supertask_dir"/'STATS'
 touch "$supertask_dir"/phnx.out
 touch "$supertask_dir"/phnx.err
 
-BASEPATH="/project2/ishanu/DMYTRO_PHNX/PHNX/"
+#BASEPATH="/project2/ishanu/DMYTRO_PHNX/PHNX/"
 
 ###########################################################
 #                       PART 2                            # 
@@ -57,8 +57,10 @@ BASEPATH="/project2/ishanu/DMYTRO_PHNX/PHNX/"
 ## OPEN THE FILES FROM THE PAYLOAD
 TASKDIR="$supertask_dir"/ALL_TASKS
 DYNAMIC_TASKDIR="$supertask_dir"/TODO_TASKS
-OUTFILE="$BASEPATH"/"$supertask_dir"/phnx.out
-ERRFILE="$BASEPATH"/"$supertask_dir"/phnx.err
+OUTFILE=../"$supertask_dir"/phnx.out
+ERRFILE=../"$supertask_dir"/phnx.err
+#OUTFILE="$BASEPATH"/"$supertask_dir"/phnx.out
+#ERRFILE="$BASEPATH"/"$supertask_dir"/phnx.err
 
 PROG_CALLS="$PAYLOAD"/program_calls.txt
 DEPENDENCIES="$PAYLOAD"/dependencies.txt
