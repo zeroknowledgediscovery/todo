@@ -35,6 +35,7 @@ touch $BUFFER
 # READ CURRENTLY RUNNING JOBS INFO
 squeue > squeue.dat
 # FROM SQUEUE, GET ALL IDS WITH SPECIFIED USERNAME
+> $RUNNING_IDS ## Erase the previous state of running IDs
 while read LINE;
 do 
     ID=$(echo $LINE | awk  '{print $1}')
