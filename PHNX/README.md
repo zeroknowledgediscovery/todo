@@ -23,6 +23,7 @@ Every `PAYLOAD` should contain  :
 	* `MEM`  - amount of memory to allocate
 	* `NODES` - number of nodes to use
 	* `TPC`  - number of threads to use
+	* `RUNTIME_LIMIT`  - Computing cluster runtime limit, in hours (36 for Midway)
 
 **To run:**
 ----
