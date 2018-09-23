@@ -1,8 +1,7 @@
-## ./launch_code.sh  -p amd  -d data/crimedat1000.dat  -r E -t 26 -D -m 20 -S STAT/remaining_.dat -x STAT/err_.dat  -x seqfile_.log
-
 #
 #   SUPERTASK INITIALIZER
 #
+
 
 #># import helper functions
 source ./toolbox.sh
@@ -56,6 +55,8 @@ TASKDIR="$supertask_dir"/ALL_TASKS
 DYNAMIC_TASKDIR="$supertask_dir"/TODO_TASKS
 OUTFILE=$PWD/"$supertask_dir"/phnx.out
 ERRFILE=$PWD/"$supertask_dir"/phnx.err
+#OUTFILE="$BASEPATH"/"$supertask_dir"/phnx.out
+#ERRFILE="$BASEPATH"/"$supertask_dir"/phnx.err
 
 PROG_CALLS="$PAYLOAD"/program_calls.txt
 DEPENDENCIES="$PAYLOAD"/dependencies.txt
@@ -81,16 +82,16 @@ do
     echo '#SBATCH --nodes='"$NODES" >> $SBC
     echo '#SBATCH --ntasks-per-node='"$TPC" >> $SBC
     echo '#SBATCH --partition='"$PARTITION" >> $SBC
-
-	### WRITE OUT ALL THE DEPENDENCIES NEEDED
-	while read dependency; do
-	    echo 'module load '$dependency >> $SBC
-	done <$DEPENDENCIES
+    
+    ### WRITE OUT ALL THE DEPENDENCIES NEEDED
+    while read dependency; do
+        echo 'module load '"$dependency" >> $SBC
+    done < $DEPENDENCIES
 
     ##
     ## WRITE THE PROGRAM CALL ITSELF
     ##  
-	echo "$PROGRAM_CALL" >> $SBC   ### echo $PROGRAM_CALL >> $SBC
+    echo "$PROGRAM_CALL" >> $SBC  
 
     echo '' >> $SBC
 
@@ -106,4 +107,4 @@ echo "$ID Jobs received."
 #           LAUNCH THE PROGRAM           #
 ########################################## 
 
-./iterator.sh $SUPERTASK $INTERVAL $USER $MAX_PARALLEL_JOBS
+./iterator.sh $SUPERTASK $INTERVAL $USER $MAX_PARALLEL_JOBS $RUNTIME_LIMIT
