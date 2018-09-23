@@ -14,7 +14,7 @@ Every `PAYLOAD` should contain  :
 * `program_calls.txt`  - list of program calls to run, each line contains one call
 * `dependencies.txt`  - list of program dependencies to install
 * `running_config.txt`  - list of slurm running parameters :
-	* `USER`  - slurm user (ishanu)
+	* `USER`  - your midway username
 	* `MAX_PARALLEL_JOBS`  - maximum amount of simultaneous job runs allowed
 	* `INTERVAL` - interval between PHNX iterations, in seconds
 	* `PARTITION`  - cluster's partition to run on
