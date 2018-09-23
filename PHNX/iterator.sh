@@ -31,7 +31,7 @@ do
     current_time=`date '+%s'`
     time_passed=$(($current_time - $start_time))
     if [ $time_passed -gt $RUNTIME_LIMIT ] ; then
-        ./$0 $1 $2 $3 $4 $5
+        exec $0 $1 $2 $3 $4 $5
         break
     fi
     let TIME="$INTERVAL"
