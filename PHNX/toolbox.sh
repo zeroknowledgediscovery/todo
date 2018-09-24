@@ -61,9 +61,6 @@ update_remaining()
 
     # COPY ALL SCRIPTS THAT ARE NOT DONE AND NOT RUNNING
     # FOR LATER :: MB ALSO EXCLUDE THE ERRED ONES, NEED TO CLARIFY
-    if [ $VERBOSE_FLAG == 1 ] ; then
-        #echo " => Jobs to be run ::"
-    fi
     for FILEPATH in "$ALL_FILES"/*; do
         FILENAME=$(basename $FILEPATH)
         if [ ! -f "$DONE_FILES"/"$FILENAME" ] && [ ! -f "$IN_PROGRESS"/"$FILENAME" ] && [ ! -f "$FAILED"/"$FILENAME" ];
