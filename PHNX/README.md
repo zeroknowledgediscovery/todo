@@ -13,7 +13,7 @@ Every `PAYLOAD` should contain  :
 * `bin` - folder containing all the executables to be executed during the supertask
 * `program_calls.txt`  - list of program calls to run, each line contains one call
 * `dependencies.txt`  - list of program dependencies to install
-* `running_config.txt`  - list of slurm running parameters :
+* `running_config.txt`  - list of Midway running parameters :
 	* `USER`  - your midway username
 	* `MAX_PARALLEL_JOBS`  - maximum amount of simultaneous job runs allowed
 	* `INTERVAL` - interval between PHNX iterations, in seconds
@@ -23,13 +23,25 @@ Every `PAYLOAD` should contain  :
 	* `MEM`  - amount of memory to allocate
 	* `NODES` - number of nodes to use
 	* `TPC`  - number of threads to use
-	* `RUNTIME_LIMIT`  - Computing cluster runtime limit, in hours (36 for Midway)
 
 **To run:**
 ----
+Copy the PHNX folder to the directory from which you intend to run the tasks.
+
+Get PAYLOAD folder ready (also see `SAMPLE_PAYLOAD` and `TERROR_PAYLOAD` for an examples)
+
 In PHNX folder, run:
-`./initializer.sh [SUPERTASK_NAME] [FULL_PAYLOAD_PATH]`
-also see `SAMPLE_PAYLOAD` and `TERROR_PAYLOAD` for an examples;
+`./phnx.sh [SUPERTASK_NAME] [FULL_PAYLOAD_PATH]`
+
+The standard and error outputs are saved at `PHNX/SUPERTASK_NAME/phnx.out` and `PHNX/SUPERTASK_NAME/phnx.out`
+
+The program results are saved at `PAYLOAD` folder.
+
+**To resume:**
+----
+In PHNX folder, run:
+`./phnx.sh [SUPERTASK_NAME] [FULL_PAYLOAD_PATH]`
+
 
 **TERROR example:**
 ----
@@ -37,12 +49,12 @@ Load `TERROR_PAYLOAD` on your instance;
 
 Load `PHNX` folder on your instance, cd to it;
 
-Run `./initializer.sh TERROR [full_path_to_payload_folder]`
+Run `./phnx.sh TERROR [full_path_to_payload_folder]`
 
 **Script descriptions**
 ----
 
-* **initializer.sh**
+* **phnx.sh**
 Initialize the supertask folder, convert all program calls into slurm .sbc scripts (enriched with slurm running configs, dependencies);
 Run `iterator.sh`;
 
