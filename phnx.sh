@@ -7,7 +7,7 @@
 source ./toolbox.sh
 
 
-USAGE="Usage:  <SUPERTASK> <PAYLOAD>"
+USAGE="Usage:./phnx.sh  <SUPERTASK> <PAYLOAD>"
 
 ###########################################
 #                PART 0                   # 
@@ -15,13 +15,20 @@ USAGE="Usage:  <SUPERTASK> <PAYLOAD>"
 ###########################################
 SUPERTASK="$1"
 PAYLOAD="$2"
-
+supertask_dir="$SUPERTASK"
 ##################################################
 # EXTRACT RUNNING PARAMS from running_config.txt #
 #                INTO VARIABLES                  #
 #    see toolbox.sh::read_configs for details    #
 ##################################################
 read_configs "$PAYLOAD"/running_config.txt
+
+##################################################
+#  RESUME THE CURRENT RUN IF ALREADY INITIALIZED #
+##################################################
+if [ -d "$supertask_dir" ]; then
+  ./iterator.sh $SUPERTASK $INTERVAL $USER $MAX_PARALLEL_JOBS
+fi
 
 ##################################################
 #  ENABLE EXECUTION OF ALL FILES IN PAYLOAD/bin  #
@@ -107,4 +114,4 @@ echo "$ID Jobs received."
 #           LAUNCH THE PROGRAM           #
 ########################################## 
 
-./iterator.sh $SUPERTASK $INTERVAL $USER $MAX_PARALLEL_JOBS $RUNTIME_LIMIT
+./iterator.sh $SUPERTASK $INTERVAL $USER $MAX_PARALLEL_JOBS
